@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Grant Siebrecht">
+    <title>Meet Signup</title>
+
+    <!--import bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.4.1.js"
+            integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.6/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.js"></script>
+
+    <script>
+    $(function() {
+      $("#header").load("/static/nav.html");
+      $("#footer").load("/static/footer.html");
+    });
+
+    </script>
+
+</head>
+
+<body>
+
+<div id="header"></div>
+<br>
+
+<div class="container">
+	<p><span class="alert alert-info">Meet: {{ meetNumber }} -  {{ location }}</span></p>
+    <form id="myform" action="submitform">
+
+    <table class="table">
+        <thead>
+            <th>Task</th>
+            <th>Description</th>
+        </thead>
+        <tbody>
+
+        {% for row in rows %}
+	  <tr>
+              <td nowrap>{{ row['task'] }}</td>
+              <td>{{ row['description'] }}</td>
+	      <input hidden class="form-control" name="aDescription" type="text" value="{{ row['description'] }}">
+          </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+        <input hidden class="form-control" name="aID" type="text" value="{{ id }}"><br>
+	    <input hidden class="form-control" name="aMeetNumber" type="text" value="{{ meetNumber }}"><br>
+        <input hidden class="form-control" name="aTask" type="text" value="{{ mytask }}"><br>
+	    <input class="form-control" required name="aName" type="text" placeholder="Name"><br>
+        <input class="form-control" required name="aEmail" type="email" placeholder="Email"><br>
+        <input class="form-control" name="aNotes" type="text" placeholder="Notes (optional)"><br>
+        <button class="btn btn-success">Submit</button>
+    </form>
+</div>
+
+
+
+
+    <div id="footer"></div>
+
+</body>
+
+</html>
+

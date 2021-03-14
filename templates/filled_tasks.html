@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Grant Siebrecht">
+    <title>Filled Tasks</title>
+
+    <!--import bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.4.1.js"
+            integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.6/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.js"></script>
+    <!-- import google fonts lobster and open sans -->
+    <link href="https://fonts.googleapis.com/css?family=Lobster|Open+Sans" rel="stylesheet">
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+
+    <script>
+    $(function() {
+      $("#header").load("./static/nav.html");
+      $("#footer").load("./static/footer.html");
+    });
+
+    </script>
+
+</head>
+
+<body>
+
+<div id="header"></div>
+<br>
+
+<div class="container">
+<h3 class="text-center">Filled Positions</h3>
+
+<form class="form-inline" action="./filledTasks">
+<label for="myfilter" class="m-2">Filter by Meet</label>
+<select id="myfilter" style="width:40%" class="form-control" onchange="this.form.submit()" name="aMeetNumber">
+<option selected disabled value="">Select a Meet</option>
+<option value="1">1 - Sac City</option>
+<option value="2">2 - Guthrie Center</option>
+<option value="3">3 - Sac City</option>
+<option value="4">4 - Jefferson</option>
+<option value="5">5 - Sac City</option>
+<option value="6">6 - Coon Rapids</option>
+<option value="7">7 - Manning</option>
+<option value="8">8 - Sac City</option>
+<option value="9">9 - Denison</option>
+<option value="10">Conference</option>
+<option value="">Show All</option>
+</select>
+</form>
+
+
+    <table class="table">
+        <thead>
+            <th>Meet Number</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Task</th>
+            <!--<th>TaskID</th>-->
+            <th>Name</th>
+	    <th>Notes</th>
+            <th></th>
+        </thead>
+        <tbody>
+{% for row in rows %}
+          <tr>
+            <td>{{ row['meetNumber'] }}</td>
+            <td>{{ row['location'] }}</td>
+            <td>{{ row['date'] }}</td>
+            <td>{{ row['task'] }}<br>
+                <!--<span class="text-muted"> {{ row['description'] }} </span>-->
+            </td>
+            <!--<td>{{ row['id'] }}<br>-->
+            <td>{{ row['Name'] }}<br>
+            <td>{{ row['notes'] }}</td>
+
+	<td>
+		{% if admin == '1' %}
+		    <a class="btn btn-danger" href="./delete?delete=yes&id={{ row['id'] }}">Delete</a> 
+		{% endif %}
+	</td>
+
+
+        </tr>
+{% endfor %}
+
+
+
+        </tbody>
+    </table>
+
+</div>
+
+
+
+
+    <div id="footer"></div>
+
+</body>
+
+</html>
+
