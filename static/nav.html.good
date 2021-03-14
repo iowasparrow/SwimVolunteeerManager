@@ -1,0 +1,60 @@
+        <style>
+            .logoStyle {
+                display: block;
+                max-width: 100%;
+                height: 24px;
+                width: 151px;
+            }
+
+    </style>
+
+
+
+
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+  <a class="navbar-brand" href="./">Sharks</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+   <!--         <li class="nav-item active">-->
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Available Positions By Meet</a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class="dropdown-item" href="./?aMeetNumber=1">Meet 1 - Sac City</a>
+                    <a class="dropdown-item" href="./?aMeetNumber=2">Meet 2 - Guthrie Center</a>
+                    <a class="dropdown-item" href="./?aMeetNumber=3">Meet 3 - Sac City</a>
+                    <a class="dropdown-item" href="./?aMeetNumber=4">Meet 4 - Jefferson</a>
+                    <a class="dropdown-item" href="./?aMeetNumber=5">Meet 5 - Sac City</a>
+                    <a class="dropdown-item" href="./?aMeetNumber=6">Meet 6 - Coon Rapids</a>
+		    <a class="dropdown-item" href="./?aMeetNumber=7">Meet 7 - Manning</a>
+		    <a class="dropdown-item" href="./?aMeetNumber=8">Meet 8 - Sac City</a>
+		    <a class="dropdown-item" href="./?aMeetNumber=9">Meet 9 - Denison</a>
+		    <a class="dropdown-item" href="./?aMeetNumber=10">Conference - Guthrie Center</a>
+ 		    <a class="dropdown-item" href="./">Show All</a>
+		</div>
+           </li>
+
+            <li>
+                <a class="nav-link" href="./filledTasks">Filled Positions</a>
+            </li>
+
+           
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Schedule</a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                	<a class="dropdown-item" href="./static/2021_IWSC_Schedule.jpg">Meet Schedule - All Teams</a>
+			<a target="_blank" class="dropdown-item" href="https://calendar.google.com/calendar/u/0/embed?src=mjj0arngdo3c0dai28ug2q5les@group.calendar.google.com&ctz=America/Chicago">Google Calendar</a>
+                </div>
+           </li>
+
+            <li>
+                <a class="nav-link" href="mailto:grant@siebrecht.us">Contact</a>
+            </li>
+
+        </ul>
+    </div>
+
+</nav>
