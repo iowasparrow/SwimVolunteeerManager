@@ -1,30 +1,35 @@
 <!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="author" content="Grant Siebrecht">
     <title>Available Tasks - Swim Team</title>
 
+
     <!--import bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <script src="https://code.jquery.com/jquery-3.4.1.js"
-            integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+      integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.6/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <link rel="shortcut icon" href="/static/favicon.ico" />
-<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
   <script>
   $( function() {
     $( document ).tooltip();
+  } );
+  </script>
+
+  <script>
+  $( function() {
+    //$( "#dialog" ).dialog();
   } );
   </script>
 
@@ -34,24 +39,28 @@
       $("#header").load("/static/nav.html");
       $("#footer").load("/static/footer.html");
     });
-
     </script>
 
 </head>
 
 <body>
-
 <div id="header"></div>
 <br>
-
 <div class="container">
 {% with messages = get_flashed_messages() %}
    {% if messages %}
       {% for message in messages %}
-         <span class="alert alert-info">{{ message }}</span>
+         <div class="alert alert-info">{{ message }}</div>
       {% endfor %}
    {% endif %}
 {% endwith %}
+
+
+<div id="dialog" title="information">
+  <!--<p>The meet for June 9th has been postponed.</p>-->
+</div>
+
+
 
 <h3 class="text-center">
 
@@ -61,26 +70,20 @@
 	Available Positions For Meet {{ meetnumber }}
 {% endif %}
 </h3>
+<!--<p><div class="text-center">A few days before the meet a reminder email will be sent out with google maps directions to the pool.</div></p>-->
+
+
 
 <form class="form-inline" action="./">
 <label for="myfilter" class="m-2">Filter by Meet</label>
 <select id="myfilter" style="width:40%" class="form-control" onchange="this.form.submit()" name="aMeetNumber">
 <option selected disabled value="">Select a Meet</option>
-<option value="1">1 - Sac City</option>
-<option value="2">2 - Guthrie Center</option>
-<option value="3">3 - Sac City</option>
-<option value="4">4 - Jefferson</option>
-<option value="5">5 - Sac City</option>
-<option value="6">6 - Coon Rapids</option>
-<option value="7">7 - Manning</option>
-<option value="8">8 - Sac City</option>
-<option value="9">9 - Denison</option>
-<option value="10">Conference</option>
+{% for meet in available_meets %}
+    <option value="{{ meet[0] }}"> {{ meet[0] }} -  {{ meet[1] }}</option>
+{% endfor %}
 <option value="">Show All</option>
 </select>
 </form>
-
-
 
     <table class="table table-striped">
         <thead>
@@ -89,27 +92,35 @@
             <th></th>
         </thead>
         <tbody>
-{% for row in rows %}
+	{% for row in rows %}
+	{% if  row['disabled'] != 1 and row['meetnumber'] >= available_meets[0][0] %}
           <tr>
             <td nowrap>
-		{% if row['opponent'] != None %}
-			<span title="Home Meet">{{ row['location'] }} vs. {{ row['opponent'] }}</span>
+		{% if row['opponent'] != None and row['opponent'] != 'Conference'%}
+			<span title="Meet {{ row['meetnumber'] }}">{{ row['location'] }} vs. {{ row['opponent'] }}</span>&nbsp;&nbsp;<span class="badge badge-sm badge-success">Home Meet</span><!--home meet-->
 		{% else %}
-			<span class="text-info"><i class="fa fa-at"></i></span>&nbsp;{{ row['location'] }}
+			<span  title="Meet {{ row['meetnumber'] }}" class="text-info"><i class="fa fa-at"></i>&nbsp;{{ row['location'] }}</span><!--away meet-->
 		{% endif %}
 		<br>
 		<span class="text-muted">{{ row['date'] }}</span>
 	    </td>
-            <td>{{ row['task'] }}
-                <!--<span class="text-muted"> {{ row['description'] }} </span>-->
-            </td>
+            <td>{{ row['task'] }}</td>
             <td>
-                <a class="btn btn-primary" href="signmeup?id={{ row['id'] }}&aMeetNumber={{ row['meetNumber'] }}&location={{ row['location'] }}">Sign Up</a>
+                <a class="btn btn-primary btn-sm" href="signmeup?id={{ row['id'] }}&aMeetNumber={{ row['meetNumber'] }}&location={{ row['location'] }}">Sign Up</a>
             </td>
         </tr>
-{% endfor %}
+	{% endif %}
+	{% endfor %}
+
         </tbody>
     </table>
+
+        {% if not rows %}
+        <div class="alert alert-success text-center">All positions filled</div> 
+        {% endif %}
+
+
+
 </div>
 	<div id="footer"></div>
 </body>
