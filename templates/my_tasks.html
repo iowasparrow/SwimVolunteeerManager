@@ -1,40 +1,5 @@
-<!DOCTYPE html>
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="author" content="Grant Siebrecht">
-    <title>My Tasks</title>
-
-    <!--import bootstrap -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-    <script src="https://code.jquery.com/jquery-3.4.1.js"
-            integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.6/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.js"></script>
-    <!-- import google fonts lobster and open sans -->
-    <link href="https://fonts.googleapis.com/css?family=Lobster|Open+Sans" rel="stylesheet">
-    <link rel="shortcut icon" href="/static/favicon.ico" />
-
-    <script>
-    $(function() {
-      $("#header").load("./static/nav.html");
-      $("#footer").load("./static/footer.html");
-    });
-
-    </script>
-
-</head>
-
-<body>
-
-<div id="header"></div>
-<br>
+{% extends "base.html" %}
+{% block content %}
 
 <div class="container">
 <h3 class="text-center">My Positions</h3>
@@ -77,13 +42,4 @@
     </table>
 
 </div>
-
-
-
-
-    <div id="footer"></div>
-
-</body>
-
-</html>
-
+{% endblock %}
