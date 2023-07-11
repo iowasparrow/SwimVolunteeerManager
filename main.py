@@ -1,5 +1,4 @@
-from flask import Flask
-from flask import render_template, flash, request, redirect, url_for, session
+from flask import render_template, flash, request, redirect, url_for, session, jsonify, Flask
 import sqlite3
 import smtplib
 import logging
@@ -9,9 +8,8 @@ from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2u"F4Q8z\n\xec]/'
-database = '/var/www/html/signup/signup.db'
-# database = 'signup.db'
-# toptimesdatabase = '/var/www/html/signup/toptimes.db'
+#database = '/var/www/html/signup/signup.db'
+database = 'signup.db'
 now = datetime.datetime.today().strftime('%#m/%d/%Y')  # the hash sign means to stip the leading zero
 
 
@@ -116,6 +114,12 @@ def get_map(meetnumber):
     return address
 
 
+@app.route('/live')
+def live():
+    myliveurl = 'https://youtube.com/channel/UCtQUAfNCN6wtwia6VuJoeeg/live'
+    #return render_template("livestream.html", myliveurl=myliveurl)
+    return redirect("https://www.youtube.com/@gsiebrecht/streams", code=302)
+
 @app.route('/')
 def index():
     conn = sqlite3.connect(database, check_same_thread=False)
@@ -133,22 +137,13 @@ def index():
     curs.execute(sql)
     rows = curs.fetchall()
     conn.close()
-    #flash(sql)
-    #flash("No practice on 6-15-22")
-    return render_template("index.html", len=len(rows), rows=rows, available_meets=available_meets,  meetnumber=meetnumber, now=now)
-
-
-@app.route('/top_times')
-def toptimes():
-    conn = sqlite3.connect(toptimesdatabase, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    curs = conn.cursor()
-    meetdate = request.args.get('meetdate')
-    # meetdate = '7/10/2019'
-    sql = "SELECT * from tbl_swimmers WHERE meetdate = '" + meetdate + "' ORDER BY event, time"
-    curs.execute(sql)
-    rows = curs.fetchall()
-    return render_template("toptimes.html", rows=rows, meetdate=meetdate)
+    # flash(sql)
+    # flash("No practice on 6-15-22")
+    # print(available_meets)
+    if available_meets:
+        return render_template("index.html", len=len(rows), rows=rows, available_meets=available_meets,  meetnumber=meetnumber, now=now)
+    else:
+        return render_template("index.html", meetnumber=meetnumber, now=now)
 
 
 @app.route('/signmeup')
@@ -189,10 +184,9 @@ def submitform():
     meetnumber = request.args.get('aMeetNumber')
     mytask = request.args.get('aTask')
     mydescription = request.args.get('aDescription')
-    if not check_duplicate(meetnumber, myemail):  # check to see if the person already has a job, they cant do two.
+    if not check_duplicate(meetnumber, myemail):  # check to see if the person already has a job, they can't do two.
         try:
-            curs.execute("INSERT INTO tbl_volunteers (name, email, notes, task_id, meetNumber) VALUES (?,?,?,?,?)",
-                         (myname, myemail, mynotes, myid, meetnumber))
+            curs.execute("INSERT INTO tbl_volunteers (name, email, notes, task_id, meetNumber) VALUES (?,?,?,?,?)", (myname, myemail, mynotes, myid, meetnumber))
             conn.commit()
             conn.close()
             html_email(myid, myemail, meetnumber, mytask, mydescription)
@@ -201,10 +195,84 @@ def submitform():
             flash('The position has already been filled.')
             flash(str(e))
             conn.close()
-            logging.warning(
-                str(myemail) + ' tried to sign up for ' + str(mytask) + ' at meet ' + str(
-                    meetnumber) + ', already filled')
+            logging.warning(e)
+            logging.warning(str(myemail) + ' tried to sign up for ' + str(mytask) + ' at meet ' + str(meetnumber) + ', already filled')
     return render_template('success.html', email=myemail, meetnumber=meetnumber)
+
+
+@app.route('/available_tasks_android')
+def available_tasks_android():
+    conn = sqlite3.connect(database, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    curs = conn.cursor()
+    sql = "SELECT tbl_tasks.task, tbl_meets.opponent, tbl_tasks.description, tbl_tasks.id, tbl_tasks.meetNumber, tbl_volunteers.task_id, tbl_meets.date, tbl_meets.location, tbl_tasks.disabled FROM (tbl_tasks LEFT JOIN tbl_volunteers ON tbl_volunteers.task_id = tbl_tasks.id) INNER JOIN tbl_meets ON tbl_tasks.meetNumber = tbl_meets.meetNumber WHERE ((tbl_volunteers.task_id) Is Null AND tbl_tasks.disabled Is Null ) ORDER BY tbl_tasks.meetNumber"
+    print(sql)
+    curs.execute(sql)
+    rows = curs.fetchall()
+    conn.close()
+    list_of_dict = []
+    for row in rows:
+        mytask = row['task']
+        opponent = row['opponent']
+        description = row['description']
+        rowid = row['id']
+        meetnumber = row['meetNumber']
+        meetdate = row['Date']
+        location = row['location']
+        disabled = row['disabled']
+        if opponent:
+            homeMeet = True
+        else:
+            homeMeet = False
+
+        myjson = {'rowid': rowid, 'homeMeet': homeMeet, 'disabled': disabled, 'task': mytask, 'meetnumber': meetnumber, 'description': description, 'location': location,  'opponent': opponent, 'meetdate': meetdate}
+        list_of_dict.append(myjson)
+    if rows != []:
+        return jsonify(list_of_dict)
+    else:
+        return {'status': 'failure', 'reason': 'no meets'}
+
+
+@app.route('/filledTasksAndroid')
+def filledTasksAndroid():
+    conn = sqlite3.connect(database, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    curs = conn.cursor()
+    meetnumber = request.args.get('aMeetNumber')
+    email = request.args.get('aEmail')
+    sql = "SELECT tbl_tasks.task, tbl_tasks.description, tbl_tasks.id, tbl_tasks.meetNumber, tbl_meets.location, tbl_volunteers.name, tbl_volunteers.notes, tbl_meets.Date FROM (tbl_volunteers INNER JOIN tbl_tasks ON tbl_volunteers.task_id = tbl_tasks.id) INNER JOIN tbl_meets ON tbl_volunteers.meetNumber = tbl_meets.meetNumber WHERE tbl_meets.date > " + str(
+        now) + " ORDER BY tbl_volunteers.meetNumber;"
+    # print(sql)
+    if meetnumber:
+        sql2 = "SELECT tbl_tasks.task, tbl_tasks.description, tbl_tasks.id, tbl_tasks.meetNumber, tbl_meets.location, \
+        tbl_volunteers.name, tbl_volunteers.notes, tbl_meets.Date FROM (tbl_volunteers INNER JOIN tbl_tasks ON \
+        tbl_volunteers.task_id = tbl_tasks.id) INNER JOIN tbl_meets ON tbl_volunteers.meetNumber = tbl_meets.meetNumber \
+        WHERE tbl_volunteers.meetNumber = " + meetnumber + " ORDER BY tbl_volunteers.meetNumber;"
+        curs.execute(sql2)
+    elif email:
+        sql3 = "SELECT tbl_tasks.task, tbl_tasks.description, tbl_tasks.id, tbl_tasks.meetNumber, tbl_meets.location, \
+        tbl_volunteers.name, tbl_volunteers.notes, tbl_volunteers.email, tbl_meets.Date FROM (tbl_volunteers INNER JOIN tbl_tasks ON \
+        tbl_volunteers.task_id = tbl_tasks.id) INNER JOIN tbl_meets ON tbl_volunteers.meetNumber = tbl_meets.meetNumber \
+        WHERE tbl_volunteers.email = '" + email + "' ORDER BY tbl_volunteers.meetNumber;"
+        curs.execute(sql3)
+    else:
+        curs.execute(sql)
+    rows = curs.fetchall()
+    conn.close()
+    list_of_dict = []
+    for row in rows:
+        mytask = row['task']
+        meetnumber = row['meetNumber']
+        description = row['description']
+        location = row['location']
+        name = row['name']
+        meetdate = row['Date']
+        myjson = {'task': mytask, 'meetnumber': meetnumber, 'description': description, 'location': location,  'name': name, 'meetdate': meetdate}
+        list_of_dict.append(myjson)
+    if rows != []:
+        return jsonify(list_of_dict)
+    else:
+        return {'status': 'failure', 'reason': 'no meets'}
 
 
 @app.route('/filledTasks')
@@ -286,6 +354,15 @@ def maps():
     conn.close()
     return render_template("maps.html", len=len(rows), rows=rows)
 
+#### conference things
+@app.route('/conference')
+def conference():
+    return render_template("conference/conference.html")
+
+@app.route('/warmuptimes')
+def warmuptimes():
+    return render_template("conference/warmuptimes.html")
+#### end conference things
 
 @app.route('/addtask')
 def add_task():
@@ -306,10 +383,10 @@ def add_task():
 
 
 def html_email(id, email_to, meetnumber, mytask, description):
-    email_from = "Sac Swim Team <xxxx@xxxxx.us>"
+    email_from = "Sac Swim Team <gsiebrecht@siebrecht.us>"
     city = get_city(meetnumber)
-    address = get_map(meetnumber)
-    # email_to = 'xxx@xxx.com'
+    #address = get_map(meetnumber)
+    # email_to = 'grants@gomaco.com'
     msg = MIMEMultipart('alternative')
     msg['Subject'] = "Sac Swim Signup Reminder"
     msg['From'] = email_from
@@ -321,9 +398,8 @@ def html_email(id, email_to, meetnumber, mytask, description):
       <body>
         <p>You signed up for """ + mytask + """ at meet: """ + str(meetnumber) + """ in <b>""" + str(city) + """</b></p>
         <p>""" + description + """</p>
-        <p><a href="http://xxxxxx.xxxx/filledTasks?aEmail=""" + email_to + """\">View all the jobs I signed up for</a></p>
-        <p><a href=\"""" + address + """\">Directions to pool</a></p>
-      <p><a href="http://xxxxxxx.xxxx/delete?id=""" + id + """\">Delete Job</a></p>
+        <p><a href="http://sharkwater.live/filledTasks?aEmail=""" + email_to + """\">View all the jobs I signed up for</a></p>
+      <p><a href="http://sharkwater.live/delete?id=""" + id + """\">Delete Job</a></p>
       </body>
     </html>
     """
@@ -331,15 +407,17 @@ def html_email(id, email_to, meetnumber, mytask, description):
     part2 = MIMEText(html_version, 'html')
     msg.attach(part1)
     msg.attach(part2)
-    smtpserver = smtplib.SMTP("smtp.office365.com", 587)
-    smtpserver.ehlo()
-    smtpserver.starttls()
-    # smtpserver.login('xxxx@gomxxxxaco.com', 'xxxxxx')
-    smtpserver.login('xxxx@xxxx.us', 'xxxxxx')
-    smtpserver.sendmail(email_from, email_to, msg.as_string())
-    # print(msg.as_string())
-    smtpserver.quit()
-    flash("Email sent")
+    try:
+        smtpserver = smtplib.SMTP("smtp.office365.com", 587)
+        smtpserver.ehlo()
+        smtpserver.starttls()
+        smtpserver.login('ad.asdfasasus', 'sasdfsdafdasf')
+        smtpserver.sendmail(email_from, email_to, msg.as_string())
+        smtpserver.quit()
+        flash("Email sent")
+    except OSError as e:
+        logging.info(str(e))
+        flash(str(e))
 
 
 if __name__ == '__main__':
